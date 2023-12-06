@@ -1,4 +1,6 @@
+# from datetime import datetime
 import datetime
+# from datetime import datetime as datetime
 import uuid
 import tkinter as tk
 from tkinter import *
@@ -71,9 +73,14 @@ class Flight:
         self.available_seats = available_seats
 
     def flight_info(self):
-        return(self.date, self.departure_time.get_time(), self.duration.get_time(), self.price)
+        return(self.date)
         
-        
+        for string in self.string_list:
+            label = tk.Label(self.main_frame, text=string, bg="white", font=("Arial", 12))
+            label.place(y= y,width=100, height=50)
+            y+= 60
+            self.labels.append(label)
+
 class FlightManager:
     def __init__(self):
         self.flights = []
@@ -83,7 +90,16 @@ class FlightManager:
         
     def get_flights(self):
         for flight in self.flights:
-            print(flight.flight_info())
+            print(flight.date)
+            
+    def get_flight(self, origin, destination, date):
+        flights = []
+        for i in range(len(self.flights)):
+            if (self.flights[i].route.origin.name == origin and self.flights[i].route.destination.name == destination
+                and self.flights[i].date == date):
+                flights.append(self.flights[i])           
+        return flights     
+        
         
     def create_flight_schedule(self, route, departure_time, duration, status, code, 
                                price, available_seats, start_date, days, weekdays):
@@ -183,61 +199,75 @@ Route(City("Billund"), City("Aarhus"))
 
 print(routeContainer.get_destinations_by_origin("Aarhus"))
 
-class dropDownMenu:
-    def __init__(self, root, values):
-        self.root = root
-        self.values = values
 
-    def create_widget(self, placeholder, x, y, width, height):
-        # Combobox para mostrar rutas existentes
-        self.route_combobox = ttk.Combobox(self.root, state="readonly")
-        self.route_combobox.pack(pady=10)
-        self.route_combobox.set(str(placeholder))
+# today = datetime.today().date()
 
-        self.route_combobox.place(x=x, y=y, width=width, height=height)
-        self.fill_route_combobox()
+today = datetime.date.today()
 
-    def fill_route_combobox(self):
-        # Aquí deberías obtener las rutas existentes y agregarlas al Combobox
-        # Puedes usar routeContainer.get_routes() para obtener las rutas, adaptando según sea necesario
-        routes = routeContainer.get_route_origin_list()
-        self.route_combobox['values'] = tuple(routes)
+print(today)
 
-    def selection(self):
-        # Aquí obtén la ruta seleccionada del Combobox y muestra los vuelos asociados
-        selected_route = self.route_combobox.get()
-        print(f"Mostrar vuelos para la ruta: {selected_route}")
-        return selected_route
+# (self, route, departure_time, duration, status, date, code, price, available_seats
 
-class FlightBookingApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Flight Booking App")
-        root.geometry("700x600")
+flightManager.create_flight_schedule(route1, Time(1, 2), Time(1, 3), 1, "232", 123, 200, today, 30, [1, 2])
+print(flightManager.get_flight("aalborg", "aalborg", today)[0].flight_info())
+# fli = Flight()
 
-        # Crear y agregar widgets a la interfaz utilizando la clase CreateWidget
-        origin_ddm_widget = dropDownMenu(root, routeContainer.get_route_origin_list())
-        origin_ddm_widget.create_widget("From", 100, 30, 150, 25)
-        self.cb.bind('<<ComboboxSelected>>', self.modified)    
-        self.cb.pack()
+# fli.flight_info()
+# class dropDownMenu:
+#     def __init__(self, root, values):
+#         self.root = root
+#         self.values = values
+
+#     def create_widget(self, placeholder, x, y, width, height):
+#         # Combobox para mostrar rutas existentes
+#         self.route_combobox = ttk.Combobox(self.root, state="readonly")
+#         self.route_combobox.pack(pady=10)
+#         self.route_combobox.set(str(placeholder))
+
+#         self.route_combobox.place(x=x, y=y, width=width, height=height)
+#         self.fill_route_combobox()
+
+#     def fill_route_combobox(self):
+#         # Aquí deberías obtener las rutas existentes y agregarlas al Combobox
+#         # Puedes usar routeContainer.get_routes() para obtener las rutas, adaptando según sea necesario
+#         routes = routeContainer.get_route_origin_list()
+#         self.route_combobox['values'] = tuple(routes)
+
+#     def selection(self):
+#         # Aquí obtén la ruta seleccionada del Combobox y muestra los vuelos asociados
+#         selected_route = self.route_combobox.get()
+#         print(f"Mostrar vuelos para la ruta: {selected_route}")
+#         return selected_route
+
+# class FlightBookingApp:
+#     def __init__(self, root):
+#         self.root = root
+#         self.root.title("Flight Booking App")
+#         root.geometry("700x600")
+
+#         # Crear y agregar widgets a la interfaz utilizando la clase CreateWidget
+#         origin_ddm_widget = dropDownMenu(root, routeContainer.get_route_origin_list())
+#         origin_ddm_widget.create_widget("From", 100, 30, 150, 25)
+#         self.cb.bind('<<ComboboxSelected>>', self.modified)    
+#         self.cb.pack()
         
-        origin_ddm_widget.bind()
+#         origin_ddm_widget.bind()
         
-        if (origin_ddm_widget.selection == "Billund"):
-            print("I changed")
-        destination_ddm_widget = dropDownMenu(root, routeContainer.get_route_destination_list())
+#         if (origin_ddm_widget.selection == "Billund"):
+#             print("I changed")
+#         destination_ddm_widget = dropDownMenu(root, routeContainer.get_route_destination_list())
         
 
-        B = Button(self.root, text ="Hello", command = origin_ddm_widget.selection)
-        B.place(x=50,y=50)
+#         B = Button(self.root, text ="Hello", command = origin_ddm_widget.selection)
+#         B.place(x=50,y=50)
 
-        # Agrega un evento para que cuando se haga clic en el botón, se llame a la función print_info
-        # btn.bind("<Button-1>", print(ddm1.selection))
-        # print(ddm1.selection())
-# Función principal para ejecutar la aplicación
-def main():
-    root = tk.Tk()
-    app = FlightBookingApp(root)
-    root.mainloop()
+#         # Agrega un evento para que cuando se haga clic en el botón, se llame a la función print_info
+#         # btn.bind("<Button-1>", print(ddm1.selection))
+#         # print(ddm1.selection())
+# # Función principal para ejecutar la aplicación
+# def main():
+#     root = tk.Tk()
+#     app = FlightBookingApp(root)
+#     root.mainloop()
 
-main()
+# main()
