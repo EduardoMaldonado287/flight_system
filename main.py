@@ -3,6 +3,8 @@ import uuid
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
+from tkcalendar import Calendar
+from datetime import datetime, timedelta
 
 class Time:
     def __init__(self, hour, minute):
@@ -183,32 +185,58 @@ Route(City("Billund"), City("Aarhus"))
 
 print(routeContainer.get_destinations_by_origin("Aarhus"))
 
-class dropDownMenu:
-    def __init__(self, root, values):
+class FlightSelection:
+    def __init__(self, root):
         self.root = root
-        self.values = values
 
-    def create_widget(self, placeholder, x, y, width, height):
+    def create_widget(self):
         # Combobox para mostrar rutas existentes
-        self.route_combobox = ttk.Combobox(self.root, state="readonly")
-        self.route_combobox.pack(pady=10)
-        self.route_combobox.set(str(placeholder))
+        self.departure_combobox = ttk.Combobox(self.root, state="readonly")
+        self.departure_combobox.pack(pady=10)
+        self.departure_combobox.set("From")
+        self.departure_combobox.place(x=100, y=30, width=150, height=25)
+        self.departure_combobox['values'] = tuple(routeContainer.get_route_origin_list())
+        self.departure_combobox.bind('<<ComboboxSelected>>', self.change_destinations_options_by_departure)    
+        self.departure_combobox.pack()
 
-        self.route_combobox.place(x=x, y=y, width=width, height=height)
-        self.fill_route_combobox()
+        self.destination_combobox = ttk.Combobox(self.root, state="readonly")
+        self.destination_combobox.pack(pady=10)
+        self.destination_combobox.set("To")
+        self.destination_combobox.place(x=300, y=30, width=150, height=25)
+        self.destination_combobox['values'] = tuple(routeContainer.get_route_destination_list())
 
-    def fill_route_combobox(self):
-        # Aquí deberías obtener las rutas existentes y agregarlas al Combobox
-        # Puedes usar routeContainer.get_routes() para obtener las rutas, adaptando según sea necesario
-        routes = routeContainer.get_route_origin_list()
-        self.route_combobox['values'] = tuple(routes)
+    def get_origin(self):
+        origin = self.departure_combobox.get()
+        if origin == "From":
+            return False
+        return origin
+    
+    def get_destination(self):
+        destination = self.destination_combobox.get()
+        if destination == "To":
+            return False
+        return destination
+    
+    def change_destinations_options_by_departure(self, event):
+        origin = self.departure_combobox.get()
+        self.destination_combobox['values'] = tuple(routeContainer.get_destinations_by_origin(origin))
+        # return self.departure_combobox.get()
+    
+class Calendar:
+    def __init__(self, root):
+        self.root = root
+    
+    def create_calendar(self):
+        today = datetime.today().date()
+        two_years_later = datetime.today().date() + timedelta(days=365 * 2)
+        self.cal = Calendar(self.root, selectmode='day', year=today.year, month=today.month, day=today.day, mindate=today, maxdate=two_years_later)
+        self.cal.pack(pady=20)
+        self.cal.bind("<<CalendarSelected>>", self.on_date_select)
 
-    def selection(self):
-        # Aquí obtén la ruta seleccionada del Combobox y muestra los vuelos asociados
-        selected_route = self.route_combobox.get()
-        print(f"Mostrar vuelos para la ruta: {selected_route}")
-        return selected_route
-
+    def on_date_select(self, event):
+        return print(self.cal.get_date())
+    
+        
 class FlightBookingApp:
     def __init__(self, root):
         self.root = root
@@ -216,24 +244,15 @@ class FlightBookingApp:
         root.geometry("700x600")
 
         # Crear y agregar widgets a la interfaz utilizando la clase CreateWidget
-        origin_ddm_widget = dropDownMenu(root, routeContainer.get_route_origin_list())
-        origin_ddm_widget.create_widget("From", 100, 30, 150, 25)
-        self.cb.bind('<<ComboboxSelected>>', self.modified)    
-        self.cb.pack()
-        
-        origin_ddm_widget.bind()
-        
-        if (origin_ddm_widget.selection == "Billund"):
-            print("I changed")
-        destination_ddm_widget = dropDownMenu(root, routeContainer.get_route_destination_list())
-        
+        origin_ddm_widget = FlightSelection(root)
+        origin_ddm_widget.create_widget()
 
-        B = Button(self.root, text ="Hello", command = origin_ddm_widget.selection)
-        B.place(x=50,y=50)
+        # calendar = Calendar(self.root)
+        # calendar.create_calendar()
 
-        # Agrega un evento para que cuando se haga clic en el botón, se llame a la función print_info
-        # btn.bind("<Button-1>", print(ddm1.selection))
-        # print(ddm1.selection())
+        # B = Button(self.root, text ="Hello", command = origin_ddm_widget.selection)
+        # B.place(x=50,y=50)
+        
 # Función principal para ejecutar la aplicación
 def main():
     root = tk.Tk()

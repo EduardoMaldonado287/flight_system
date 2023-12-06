@@ -1,20 +1,36 @@
-import tkinter as tk
-from tkinter import ttk
+from tkinter import *
+from tkcalendar import Calendar
+from datetime import datetime, timedelta
 
-class Main(tk.Tk):
-     
-  def __init__(self, *args, **kwargs):
-    tk.Tk.__init__(self, *args, **kwargs)
-    self.container = tk.Frame(self)
-    self.container.pack(side="top", fill = "both", expand=True)
-    self.container.grid_rowconfigure(0, weight=1)
-    self.container.grid_columnconfigure(0, weight=1)
-    self.cb=ttk.Combobox(self.container, values=[0,1, 2, 3] , state='readonly')
-    self.cb.bind('<<ComboboxSd>>', self.modified)    
-    self.cb.pack()
-                  
-  def modified (self, event) :
-      print(self.cb.get())
-    
-main = Main()
-main.mainloop()
+# Crear objeto Tk
+root = Tk()
+
+# Establecer geometría
+root.geometry("400x400")
+
+# Añadir calendario
+today = datetime.today().date()
+two_years_later = datetime.today().date() + timedelta(days=365 * 2)
+cal = Calendar(root, selectmode='day', year=today.year, month=today.month, day=today.day, mindate=today, maxdate=two_years_later)
+cal.pack(pady=20)
+
+
+def on_date_select(event):
+    return print(cal.get_date())
+  
+cal.bind("<<CalendarSelected>>", on_date_select)
+
+# Ejecutar interfaz gráfica
+root.mainloop()
+
+
+# def get_date():
+#     selected_date = cal.get_date()
+#     # date.config(text="Selected Date is: " + selected_date)
+#     print(selected_date)
+
+# Añadir botón y etiqueta
+# Button(root, text="Get Date", command=get_date).pack(pady=20)
+
+# date = Label(root, text="CALENDARIO")
+# date.pack(pady=20)
