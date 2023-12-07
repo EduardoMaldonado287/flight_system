@@ -1,83 +1,58 @@
 import tkinter as tk
 from tkinter import ttk
 
-class ClientContainer:
-    def __init__(self):
-        self.client_list = []
-        self.current_client = None
-
-    def add_new_client(self, client):
-        self.client_list.append(client)
-        print("Registration successful for user:", client.email)
-
-    def login(self, email, password):
-        for i in range(len(self.client_list)):
-            if email == self.client_list[i].email and password == self.client_list[i].password:
-                print("Login successful user:", email)
-                self.current_client = self.client_list[i]
-                return True
-        print("Incorrect username or password")
-        return False
-
-    def logout(self):
-        self.current_client = None
-
-class Client:
-    def __init__(self, email, password):
-        self.client_id = email  # Utilizamos el email como ID para simplificar el ejemplo
-        self.email = email
-        self.password = password
-
-# Clase para la interfaz gráfica
-class ClientLoginApp:
+class FlightSummaryApp:
     def __init__(self, root):
-        self.main_frame = ttk.Frame(root)
-        self.main_frame.place(x=100, y=100, height=300, width=300)
-
         self.root = root
-        self.root.title("Client Login")
+        self.root.title("Flight Summary")
 
-        self.client_container = clientContainer
+        # Flight information
+        self.origin = "New York"
+        self.destination = "Los Angeles"
+        self.departure_time = "08:00 AM"
+        self.duration = "4 hours"
+        self.status = "Scheduled"
+        self.date = "2023-12-15"
+        self.code = "ABC123"
+        self.price = "$500"
+        self.available_seats = 50
 
-        # Variables de control para los campos de entrada
-        self.email_var = tk.StringVar()
-        self.password_var = tk.StringVar()
+        # Create a Toplevel window for the flight summary
+        self.flight_summary_window = tk.Toplevel(root)
+        self.flight_summary_window.title("Flight Summary")
 
-        # Etiquetas y campos de entrada
-        ttk.Label(self.main_frame, text="Email:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Entry(self.main_frame, textvariable=self.email_var).grid(row=0, column=1, padx=5, pady=5)
+        # Display flight information in labels
+        ttk.Label(self.flight_summary_window, text="Origin:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
+        ttk.Label(self.flight_summary_window, text=self.origin).grid(row=0, column=1, padx=5, pady=5)
 
-        ttk.Label(self.main_frame, text="Password:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Entry(self.main_frame, textvariable=self.password_var, show="*").grid(row=1, column=1, padx=5, pady=5)
+        ttk.Label(self.flight_summary_window, text="Destination:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
+        ttk.Label(self.flight_summary_window, text=self.destination).grid(row=1, column=1, padx=5, pady=5)
 
-        # Botones de Login y Register
-        ttk.Button(self.main_frame, text="Login", command=self.login).grid(row=2, column=0, columnspan=2, pady=10)
-        ttk.Button(self.main_frame, text="Register", command=self.register).grid(row=3, column=0, columnspan=2, pady=10)
+        ttk.Label(self.flight_summary_window, text="Departure Time:").grid(row=2, column=0, padx=5, pady=5, sticky=tk.W)
+        ttk.Label(self.flight_summary_window, text=self.departure_time).grid(row=2, column=1, padx=5, pady=5)
 
-    def login(self):
-        email = self.email_var.get()
-        password = self.password_var.get()
+        ttk.Label(self.flight_summary_window, text="Duration:").grid(row=3, column=0, padx=5, pady=5, sticky=tk.W)
+        ttk.Label(self.flight_summary_window, text=self.duration).grid(row=3, column=1, padx=5, pady=5)
 
-        if self.client_container.login(email, password):
-            # Aquí puedes realizar acciones adicionales después del login exitoso
-            print("Redirect to main application after successful login.")
-        else:
-            # Aquí puedes mostrar un mensaje de error al usuario
-            print("Login failed.")
+        ttk.Label(self.flight_summary_window, text="Status:").grid(row=4, column=0, padx=5, pady=5, sticky=tk.W)
+        ttk.Label(self.flight_summary_window, text=self.status).grid(row=4, column=1, padx=5, pady=5)
 
-    def register(self):
-        email = self.email_var.get()
-        password = self.password_var.get()
+        ttk.Label(self.flight_summary_window, text="Date:").grid(row=5, column=0, padx=5, pady=5, sticky=tk.W)
+        ttk.Label(self.flight_summary_window, text=self.date).grid(row=5, column=1, padx=5, pady=5)
 
-        new_client = Client(email, password)
-        self.client_container.add_new_client(new_client)
+        ttk.Label(self.flight_summary_window, text="Flight Code:").grid(row=6, column=0, padx=5, pady=5, sticky=tk.W)
+        ttk.Label(self.flight_summary_window, text=self.code).grid(row=6, column=1, padx=5, pady=5)
 
-clientContainer = ClientContainer()
+        ttk.Label(self.flight_summary_window, text="Price:").grid(row=7, column=0, padx=5, pady=5, sticky=tk.W)
+        ttk.Label(self.flight_summary_window, text=self.price).grid(row=7, column=1, padx=5, pady=5)
+
+        ttk.Label(self.flight_summary_window, text="Available Seats:").grid(row=8, column=0, padx=5, pady=5, sticky=tk.W)
+        ttk.Label(self.flight_summary_window, text=self.available_seats).grid(row=8, column=1, padx=5, pady=5)
 
 def main():
     root = tk.Tk()
-    root.geometry("900x600")
-    app = ClientLoginApp(root)
+    app = FlightSummaryApp(root)
+    root.geometry("300x300")
     root.mainloop()
 
 if __name__ == "__main__":

@@ -13,7 +13,13 @@ class Time:
         self.minute = minute
         
     def get_time(self):
-        return str(self.hour) + ":" + str(self.minute)
+        hour = str(self.hour)
+        minute = str(self.minute)
+        if len(hour) == 1:
+            hour = "0" + hour
+        if len(minute) == 1:
+            minute = "0" + minute
+        return hour + ":" + minute
         
 
 class City:
@@ -73,6 +79,15 @@ class Flight:
         self.code = code
         self.price = price
         self.available_seats = available_seats
+        
+        hour_sum, minute_sum = duration.hour + departure_time.hour, duration.minute + departure_time.minute
+        if (minute_sum > 60):
+            hour_sum += 1
+            minute_sum -= 60
+        if hour_sum > 24:
+            hour_sum -= 24
+        self.arrival_time = Time(hour_sum, minute_sum)
+        
 
     def flight_info(self):
         fInfo = ("From: " + self.route.origin.name + " to: " + self.route.destination.name + " - departure time"
@@ -95,12 +110,12 @@ class FlightManager:
         
     def get_flights_in_route_and_date(self, origin, destination, date):
         flights = []
-        print("info:", origin, destination, date)
-        print("info2", self.flights[0].route.origin.name, self.flights[0].route.destination.name, self.flights[0].date)
-        print(len(self.flights))
+        # print("info:", origin, destination, date)
+        # print("info2", self.flights[0].route.origin.name, self.flights[0].route.destination.name, self.flights[0].date)
+        # print(len(self.flights))
         for i in range(len(self.flights)):
             if (self.flights[i].route.origin.name == origin and self.flights[i].route.destination.name == destination
-                and str(self.flights[i].date) == date):
+                and str(self.flights[i].date) == date and self.flights[i].available_seats > 0):
                 flights.append(self.flights[i])
                 
         if len(flights) == 0:
@@ -124,11 +139,13 @@ class ClientContainer:
         self.current_client = None
     def add_new_client(self, client):
         self.client_list.append(client)
+        self.current_client = client
     def login(self, email, password):
         for i in range(len(self.client_list)):
             if email == self.client_list[i].email and password == self.client_list[i].password:
                 print("Login succesfull user: ", email)
                 self.current_client = self.client_list[i]
+                return True
             else:
                 print("Incorrect username or password")
     def logout(self):
@@ -203,6 +220,10 @@ class Passenger:
         self.country = country
         self.service_type = service_type
         # self.seat = seat
+        
+    def passenger_info(self):
+        pass_info = self.first_name + " " + self.surname
+        return pass_info 
         
 # BusinessClass(100)
 clientContainer = ClientContainer()
@@ -391,6 +412,7 @@ class PassengerForm:
         self.date_of_birth_var = tk.StringVar()
         self.country_var = tk.StringVar()
         self.service_type_var = tk.StringVar()
+        self.save_passenger_button = ttk.Button(self.root, text="Add Passenger 1", command=self.save_passenger)
 
         # self.add_labels()
         
@@ -417,7 +439,6 @@ class PassengerForm:
         self.service_type_menu.grid(row=4, column=1, padx=5, pady=5)
 
         # Botón para guardar la información del pasajero
-        self.save_passenger_button = ttk.Button(self.root, text="Add Passenger 1", command=self.save_passenger)
         self.save_passenger_button.place(x=100, y= 450)
 
         # Contador de pasajeros
@@ -431,8 +452,6 @@ class PassengerForm:
             print("Tiene que completar todos los campos")
             return
         
-        self.view_order_and_pay_btn.place(x= 225, y= 450)
-
         passenger = Passenger(
             first_name=self.first_name_var.get(),
             surname=self.surname_var.get(),
@@ -454,9 +473,9 @@ class PassengerForm:
         # Actualizar el texto del botón con el número actual de pasajeros
         self.save_passenger_button["text"] = f"Add Passenger {self.passenger_count}"
         # view order and pay
-    def dissapear(self):
-        self.place_forget()
-        self.pack_forget()
+    def hide(self):
+        self.main_frame.place_forget()
+        self.save_passenger_button.place_forget()
         
     def get_passenger_list(self):
         if len(self.passenger_list) == 0:
@@ -466,8 +485,11 @@ class PassengerForm:
     
 class ClientLogin:
     def __init__(self, root):
-        self.main_frame = ttk.Frame(root)
-        self.main_frame.place(x=100, y=100, height=300, width=300)
+        style = ttk.Style()
+        style.configure("Gray.TFrame", background="gray")
+        self.main_frame = ttk.Frame(root, style="Gray.TFrame")
+        self.display_user_name = tk.Label(root, text="User:")
+        self.display_user_name.place(x=5, y=2)
 
         self.root = root
         self.root.title("Client Login")
@@ -489,12 +511,17 @@ class ClientLogin:
         ttk.Button(self.main_frame, text="Login", command=self.login).grid(row=2, column=0, columnspan=2, pady=10)
         ttk.Button(self.main_frame, text="Register", command=self.register).grid(row=3, column=0, columnspan=2, pady=10)
 
+    def show_login(self):
+        self.main_frame.place(x=350, y=200, height=180, width=210)
+
     def login(self):
         email = self.email_var.get()
         password = self.password_var.get()
 
         if self.client_container.login(email, password):
             # Aquí puedes realizar acciones adicionales después del login exitoso
+            self.display_user_name.config(text="User: " + email)
+            self.hide()
             print("Redirect to main application after successful login.")
         else:
             # Aquí puedes mostrar un mensaje de error al usuario
@@ -503,13 +530,76 @@ class ClientLogin:
     def register(self):
         email = self.email_var.get()
         password = self.password_var.get()
+        
+        if not email or not password:
+            print("Cannot registrer, empty fields")
+            return
+
+        self.hide()
+        self.display_user_name.config(text="User: " + email)
 
         new_client = Client(email, password)
         self.client_container.add_new_client(new_client)
     
+    def hide(self):
+        self.main_frame.place_forget()
     
 class FlightSummary:
-     pass
+    def __init__(self, root):
+        self.root = root
+        self.style = ttk.Style()
+        self.style.configure("new.TFrame", background="#d3dce6")
+        self.counter = 0
+        self.main_frame = ttk.Frame(root, style="new.TFrame")
+        
+    def display_flight_summary(self, flight, passenger_list):
+        self.style.configure("Flight.TLabel", background="#c3cfdb", font=(None, 13))
+
+        self.main_frame.place(x=225, y= 120, height=375, width=450)
+        self.flight = flight
+        self.passenger_list = passenger_list
+        
+        # print(clientContainer.current_client.email)
+        # print(flight.flight_info())
+        # for passenger in passenger_list:
+        #     print(passenger.passenger_info())
+        tab = "    "
+        arrow = "-------------------->" 
+        route_info = ("From: " + self.flight.route.origin.name + tab*2 + arrow
+                 + tab*2 + "To: " + self.flight.route.destination.name)
+        
+        space = " "* 8 + " " * len(self.flight.route.origin.name)
+        departure_and_arrival_time = (self.flight.departure_time.get_time() + " hrs" + space +  arrow + tab*2 +
+                                      self.flight.arrival_time.get_time() + " hrs")
+        # self.create_label(self.main_frame, "")
+        self.create_label(self.main_frame, str(self.flight.date) + " - (" + self.flight.code + ")")
+        self.create_label(self.main_frame, route_info)
+        # self.create_label(self.main_frame, "To:", self.flight.route.destination.name)
+        self.create_label(self.main_frame, departure_and_arrival_time)
+        # self.create_label(self.main_frame, "")
+        # self.create_label(self.main_frame, "Duration:" +  self.flight.duration.get_time())
+
+        self.create_label(self.main_frame, "-/"*38)
+        self.create_label(self.main_frame, "Passengers: ")
+        self.create_label(self.main_frame, self.passengers_info())
+
+        self.create_label(self.main_frame, "Price" )
+        self.create_label(self.main_frame, str(self.flight.price)  + " * "  + str(len(self.passenger_list)) + " Passengers" + 
+                          " = " + str(self.flight.price * len(self.passenger_list)))
+        # self.create_label(self.main_frame, " = " + str(self.flight.price * len(self.passenger_list)))
+
+
+    def create_label(self, parent, value):
+        ttk.Label(parent, text=f"{value}", style="Flight.TLabel").grid(row=self.counter, column=0, padx=10, pady=5, sticky=tk.W)
+        self.counter += 1
+    
+    def passengers_info(self):
+        passenger_str = ""
+        len_passenger_list = len(self.passenger_list)
+        for i in range(len_passenger_list-1):
+            passenger_str += str(i+1) + " - " + self.passenger_list[i].passenger_info() + "\n"
+        passenger_str += str(len_passenger_list) + " - " + self.passenger_list[len_passenger_list-1].passenger_info()
+        return passenger_str
     
     
 class FlightBookingApp:
@@ -522,24 +612,49 @@ class FlightBookingApp:
         self.calendar = Calendar(self.root)
         self.flight_display = FlightDisplay(self.root, 100, 150)
         self.passenger_widget = PassengerForm(self.root)
+        self.client_login_widget = ClientLogin(self.root)
+        self.flight_summary_widget = FlightSummary(self.root)
+        
         search_btn = Button(self.root, text ="search", command = self.search_flight)
         search_btn.place(x=820,y=30)
         
-        profile_btn = Button(self.root, text ="search", command = self.search_flight)
+        self.profile_btn = Button(self.root, text ="Profile", command = self.client_login)
+        self.profile_btn.place(x=10, y=30)
         
-        self.search_btn2 = tk.Button(self.root, text="Select Flight", command= self.select_flight)
+        self.select_flight_btn = tk.Button(self.root, text="Select Flight", command= self.select_flight)
         
         # view order and pay
         self.view_order_and_pay_btn = tk.Button(self.root, text="View order and pay", command= self.check_out)
 
-     
+
+            # TEST ------------------        
+        # self.selected_flight = flightManager.flights[0]
+        # passenger1 = Passenger(first_name="John", surname="Doe", date_of_birth="1990-01-01", country="USA", service_type="Service")
+        # passenger2 = Passenger(first_name="Alice", surname="Smith", date_of_birth="1985-05-15", country="Canada", service_type="Premium Service")
+        # self.flight_summary_widget.display_flight_summary(self.selected_flight, [passenger1, passenger2])
+
+
+    def client_login(self):
+        self.client_login_widget.show_login()
+        
+    # When view_order_and_pay_button is pressed
     def check_out(self):
         if not self.passenger_widget.get_passenger_list():
             print("You need to add a passenger to buy a tikcet")
+            return
         
-        if not clientContainer.current_client:
-            pass
+        if (len(self.passenger_widget.get_passenger_list()) > self.selected_flight.available_seats):
+            print("Only " +  str(self.selected_flight.available_seats) + " seats left")
+            return 
+        
+        self.passenger_widget.hide()
+        self.view_order_and_pay_btn.place_forget()
+        
+        # if not clientContainer.current_client:
+        #     self.client_login_widget.show_login()
             #create account
+        self.flight_summary_widget.display_flight_summary(self.selected_flight, self.passenger_widget.get_passenger_list())
+        
         
     def search_flight(self):
         self.calendar.toggle_calendar()
@@ -552,8 +667,7 @@ class FlightBookingApp:
         if (origin and destination and date):
             flighs_list = flightManager.get_flights_in_route_and_date(origin, destination, date)
             self.flight_display.show_available_flights(flighs_list)
-            
-            self.search_btn2.place(x=100, y=500)
+            self.select_flight_btn.place(x=100, y=500)
         else:
             print("error, tiene que completar todos los campos")
         
@@ -564,9 +678,11 @@ class FlightBookingApp:
             print("no flight selected")
             return
         
-        self.search_btn2.place_forget()
+        self.select_flight_btn.place_forget()
         self.flight_display.hide()
         self.passenger_widget.add_labels()
+        self.view_order_and_pay_btn.place(x= 225, y= 450)
+
         
         
 # Función principal para ejecutar la aplicacion
