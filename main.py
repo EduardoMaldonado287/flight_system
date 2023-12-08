@@ -162,11 +162,13 @@ class Client:
     def get_tickets(self):
         for ticket in self.tickets:
             print(ticket.flight.code, ticket.flight.route.origin.name)
-        
+   
     def buy_ticket(self, flight, passengers, booking_number):
         if (flight.available_seats - len(passengers) < 0):
             print("NOT ENOUGH AVAILABLE SEATS")
             return
+        
+        #
         flight.available_seats -= len(passengers)
         
         self.tickets.append(Ticket(flight, passengers, booking_number))
@@ -244,6 +246,14 @@ flightManager.create_flight_schedule(route1, Time(1, 2), Time(1, 3), 1, "232", 1
 
 flightManager.create_flight_schedule(route1, Time(14, 20), Time(1, 0), 1, "232", 123, 200, today, 30, [0,1, 2, 3, 4, 5, 6])
 
+me = Client("e", "e")
+clientContainer.add_new_client(me)
+passenger1 = Passenger(first_name="John", surname="Doe", date_of_birth="1990-01-01", country="USA", service_type="Service")
+passenger2 = Passenger(first_name="Alice", surname="Smith", date_of_birth="1985-05-15", country="Canada", service_type="Premium Service")
+me.buy_ticket(flightManager.flights[0], [passenger1, passenger2], "BK98332")
+me.buy_ticket(flightManager.flights[4], [passenger1, passenger2], "BK98332")
+
+clientContainer.login(me.email, me.password)
 
 class FlightSelection:
     def __init__(self, root):
@@ -255,14 +265,14 @@ class FlightSelection:
         self.departure_combobox = ttk.Combobox(self.root, state="readonly")
         self.departure_combobox.pack(pady=10)
         self.departure_combobox.set("From")
-        self.departure_combobox.place(x=100, y=30, width=150, height=25)
+        self.departure_combobox.place(x=100, y=40, width=150, height=25)
         self.departure_combobox['values'] = tuple(routeContainer.get_route_origin_list())
         self.departure_combobox.bind('<<ComboboxSelected>>', self.change_destinations_options_by_departure)    
 
         self.destination_combobox = ttk.Combobox(self.root, state="readonly")
         self.destination_combobox.pack(pady=10)
         self.destination_combobox.set("To")
-        self.destination_combobox.place(x=300, y=30, width=150, height=25)
+        self.destination_combobox.place(x=300, y=40, width=150, height=25)
         self.destination_combobox['values'] = tuple(routeContainer.get_route_destination_list())
 
     def get_origin(self):
@@ -285,22 +295,24 @@ class FlightSelection:
 class FlightDisplay:
     def __init__(self, root, x_coord, y_coord):
         self.root = root
+        self.x_coord = x_coord
+        self.y_coord = y_coord
         self.flights = ""
         # Lista de strings de ejemplo
         self.string_list = []
 
         # Crear el marco principal
         self.main_frame = ttk.Frame(root)
-        self.main_frame.place(x=x_coord, y=y_coord, height=300, width=650)
 
     def show_available_flights(self, flights):
+        self.main_frame.place(x=self.x_coord, y=self.y_coord, height=300, width=650)
         self.flights = flights
         # Crear un Listbox para mostrar las strings
         self.listbox = tk.Listbox(self.main_frame, selectmode=tk.SINGLE, bg="white", font=("Arial", 12))
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10), pady=(0, 5))
         # Crear una barra de desplazamiento
         scrollbar = ttk.Scrollbar(self.main_frame, orient=tk.VERTICAL, command=self.listbox.yview)
-        scrollbar.place(x=615, y=5, height=290)
+        # scrollbar.place(x=615, y=5, height=290)
         self.prev_selected_index = None
         
         self.string_list = []
@@ -339,6 +351,9 @@ class FlightDisplay:
             print(f"Valor seleccionado: {selected_value}")
 
 
+    def get_flight_index(self):
+        return self.listbox.curselection()[0]
+    
     def get_selected_flight(self):
         if (self.listbox.curselection()):
             index = self.listbox.curselection()[0]
@@ -364,7 +379,7 @@ class Calendar:
         self.cal = WCalendar(self.root, selectmode='day', year=today.year, month=today.month, day=today.day, mindate=today, maxdate=two_years_later)
         # self.cal.pack(pady=20)
         self.cal.bind("<<CalendarSelected>>", self.on_date_select)
-        self.cal.place(x=500, y=30)
+        self.cal.place(x=500, y=70)
         self.active = True
 
     def on_date_select(self, event):
@@ -379,7 +394,7 @@ class Calendar:
     
     def create_calendar_button(self):
             self.calendar_button = Button(self.root, text="Toggle Calendar", command=self.toggle_calendar)
-            self.calendar_button.place(x= 500, y = 30, width=100, height= 30)
+            self.calendar_button.place(x= 500, y = 40, width=100, height= 30)
 
     def toggle_calendar(self):
         if self.active:
@@ -418,6 +433,7 @@ class PassengerForm:
         
     def add_labels(self):
         # Etiquetas y campos de entrada
+        # self.passenger_list.clear()
         self.main_frame.place(x=100, y=200, height=300, width=650)
 
         ttk.Label(self.main_frame, text="First Name:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
@@ -489,7 +505,7 @@ class ClientLogin:
         style.configure("Gray.TFrame", background="gray")
         self.main_frame = ttk.Frame(root, style="Gray.TFrame")
         self.display_user_name = tk.Label(root, text="User:")
-        self.display_user_name.place(x=5, y=2)
+        self.display_user_name.place(x=700, y=6)
 
         self.root = root
         self.root.title("Client Login")
@@ -544,20 +560,22 @@ class ClientLogin:
     def hide(self):
         self.main_frame.place_forget()
     
+    
 class FlightSummary:
     def __init__(self, root):
         self.root = root
         self.style = ttk.Style()
         self.style.configure("new.TFrame", background="#d3dce6")
         self.counter = 0
-        self.main_frame = ttk.Frame(root, style="new.TFrame")
         
     def display_flight_summary(self, flight, passenger_list):
+        self.main_frame = ttk.Frame(self.root, style="new.TFrame")
         self.style.configure("Flight.TLabel", background="#c3cfdb", font=(None, 13))
 
         self.main_frame.place(x=225, y= 120, height=375, width=450)
         self.flight = flight
         self.passenger_list = passenger_list
+        self.label_list = []
         
         # print(clientContainer.current_client.email)
         # print(flight.flight_info())
@@ -590,7 +608,9 @@ class FlightSummary:
 
 
     def create_label(self, parent, value):
+        print("Add labels")
         ttk.Label(parent, text=f"{value}", style="Flight.TLabel").grid(row=self.counter, column=0, padx=10, pady=5, sticky=tk.W)
+        # print(label)
         self.counter += 1
     
     def passengers_info(self):
@@ -601,12 +621,17 @@ class FlightSummary:
         passenger_str += str(len_passenger_list) + " - " + self.passenger_list[len_passenger_list-1].passenger_info()
         return passenger_str
     
+    def hide(self):
+        # self.main_frame.destroy()
+        self.main_frame.place_forget()
+        for label in self.label_list:
+            print(label)
     
 class FlightBookingApp:
     def __init__(self, root):
         self.root = root
         self.selected_flight = ""
-
+        self.is_getting_client_tickets = False
         # Crear y agregar widgets a la interfaz utilizando la clase CreateWidget
         self.route_widget = FlightSelection(root)
         self.calendar = Calendar(self.root)
@@ -615,17 +640,24 @@ class FlightBookingApp:
         self.client_login_widget = ClientLogin(self.root)
         self.flight_summary_widget = FlightSummary(self.root)
         
+        line_btn = Button(self.root)
+        line_btn.place(x=5, y=30, width= 880, height=4)
+        
         search_btn = Button(self.root, text ="search", command = self.search_flight)
-        search_btn.place(x=820,y=30)
+        search_btn.place(x=820,y=40)
+        
+        self.my_bookings_btn = Button(self.root, text ="My Bookings", command = self.show_user_bookings)
+        self.my_bookings_btn.place(x=80,y=2)
         
         self.profile_btn = Button(self.root, text ="Profile", command = self.client_login)
-        self.profile_btn.place(x=10, y=30)
+        self.profile_btn.place(x=10, y=2)
         
         self.select_flight_btn = tk.Button(self.root, text="Select Flight", command= self.select_flight)
         
         # view order and pay
         self.view_order_and_pay_btn = tk.Button(self.root, text="View order and pay", command= self.check_out)
 
+        self.complete_order_btn = tk.Button(self.root, text="Click here to confirm the order", command= self.finish_order)
 
             # TEST ------------------        
         # self.selected_flight = flightManager.flights[0]
@@ -634,8 +666,38 @@ class FlightBookingApp:
         # self.flight_summary_widget.display_flight_summary(self.selected_flight, [passenger1, passenger2])
 
 
-    def client_login(self):
-        self.client_login_widget.show_login()
+# //////////////////////////////////////////////////////7
+
+
+    def show_user_bookings(self):
+        if not clientContainer.current_client:
+            return print("You need to log in to see your bookings")
+        
+        if len(clientContainer.current_client.tickets) == 0:
+            return print("There are no flights to select")
+        
+        client_flights = [ticket.flight for ticket in clientContainer.current_client.tickets]
+        self.flight_display.show_available_flights(client_flights)
+        # self.select_flight_in_bookings_btn = tk.Button(self.root, text="Select Flight", command= self.select_flight)
+
+        self.close_btn = tk.Button(self.root, text=" X ",  bg="blue", fg="white", 
+                                   command= lambda:(self.flight_summary_widget.hide(), self.close_btn.place_forget()))
+
+        self.select_flight_in_bookings_btn = tk.Button(self.root, text="Select Flight", 
+            command=lambda: (self.flight_summary_widget.display_flight_summary(
+                self.flight_display.get_selected_flight(),
+                clientContainer.current_client.tickets[self.flight_display.get_flight_index()].passengers
+            ),
+            self.close_btn.place(x=650, y=95)
+            )
+        )
+        self.select_flight_in_bookings_btn.place(x= 100, y=500)
+
+
+    def finish_order(self):
+        # self.booking_number = str(uuid.uuid4()) 
+        clientContainer.current_client.buy_ticket(self.select_flight, self.passenger_widget.get_passenger_list, str(uuid.uuid4()))
+        # self.ticket = Ticket(self.selected_flight, self.passenger_widget.get_passenger_list(), self.booking_number)
         
     # When view_order_and_pay_button is pressed
     def check_out(self):
@@ -650,16 +712,27 @@ class FlightBookingApp:
         self.passenger_widget.hide()
         self.view_order_and_pay_btn.place_forget()
         
+        # click here to confirm the order
+        
+        # login or register to confirm the order
+        
+        if not clientContainer.current_client:
+            self.complete_order_btn["text"] = "Login or Register \n to complete Order"
+        
+        else:
+            self.complete_order_btn.place(x=100, y = 450)
+
         # if not clientContainer.current_client:
         #     self.client_login_widget.show_login()
             #create account
         self.flight_summary_widget.display_flight_summary(self.selected_flight, self.passenger_widget.get_passenger_list())
         
+
+    def client_login(self):
+        self.client_login_widget.show_login()
         
     def search_flight(self):
         self.calendar.toggle_calendar()
-
-        
         origin = self.route_widget.get_origin()
         destination = self.route_widget.get_destination()
         date = self.calendar.get_date()
@@ -677,13 +750,12 @@ class FlightBookingApp:
         if not self.selected_flight:
             print("no flight selected")
             return
-        
+    
         self.select_flight_btn.place_forget()
         self.flight_display.hide()
         self.passenger_widget.add_labels()
         self.view_order_and_pay_btn.place(x= 225, y= 450)
 
-        
         
 # Función principal para ejecutar la aplicacion
 def main():
