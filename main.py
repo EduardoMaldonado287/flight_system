@@ -201,10 +201,6 @@ class Service:
         self.price = price
         self.features = ["1 luggage"]
         serviceContainer.add_service(self)
-    #     self.add_to_service_container()
-    
-    # def add_to_service_container(self):
-    #     serviceContainer.add_service(self)
         
         
 class EconomyClass(Service):
@@ -373,55 +369,23 @@ class FlightBookingApp:
         self.view_order_and_pay_btn.lift()
 
     def hide_widgets(self):
-        try:
-            # print(self.flight_display.x_coord)
-            self.flight_display.hide()
-        except:
-            None
-            # print("Unable to hide flight display")
-            
-        try: 
-            self.flight_summary_widget.hide()
-            # print("did hide fligth summary")
+        elements_to_hide = [
+            self.flight_display, 
+            self.flight_summary_widget, 
+            self.complete_order_btn, 
+            self.select_flight_btn, 
+            self.purchase_completed_label,
+            self.passenger_widget, 
+            self.select_flight_in_bookings_btn, 
+            self.my_booking_label
+        ]
 
-        except:
-            None 
-            #print("Unable to hide flight summary")
-            
-        try: 
-            self.complete_order_btn.place_forget()
-            # print("did hide complete button")
-        except:
-            None
-            # print("Unable to hide button")     
-            
-        try:
-            self.select_flight_btn.place_forget()
-        except:
-            None
-            # print("Unable to hide select btn")       
-        
-        try:
-            self.purchase_completed_label.place_forget()
-        except:
-            None
-            # print("Cannot delete label")
-            
-        try:
-            self.passenger_widget.hide()
-        except:
-            None
-            # print("Cannot delete label")
+        for element in elements_to_hide:
+            try:
+                element.hide() if hasattr(element, 'hide') else element.place_forget()
+            except Exception as e:
+                print(f"Unable to hide or place_forget: {e}")
 
-        try:
-            self.select_flight_in_bookings_btn.place_forget()
-        except:
-            None
-            # print("Cannot delete label")
-        try:
-            self.my_booking_label.place_forget()
-        except:
-            None    
             
 class FlightSelection:
     def __init__(self, root):
@@ -782,5 +746,4 @@ def main():
     app = FlightBookingApp(root)
     root.mainloop()
 main()
-
 
