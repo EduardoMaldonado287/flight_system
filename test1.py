@@ -1,55 +1,29 @@
-import tkinter as tk
-from tkinter import ttk
+class Vehicle:
+    def __init__(self):
+        self.a= 1
 
-class FlightSummaryApp:
-    def __init__(self, root):
-        self.root = root
-        # self.root.title("Flight Summary")
-        self.counter = 0
-        # Flight information
-        self.origin = "New York"
-        self.destination = "Los Angeles"
-        self.departure_time = "08:00 AM"
-        self.duration = "4 hours"
-        self.status = "Scheduled"
-        self.date = "2023-12-15"
-        self.code = "ABC123"
-        self.price = "$500"
-        self.available_seats = 50
+    def create_atr(self, brand, model):
+        self.brand = brand
+        self.model = model
+        
+    def display_info(self):
+        print(f"Vehicle: {self.brand} {self.model}")
+        
 
-        # Create a Toplevel window for the flight summary
-        # self.flight_summary_window = tk.Toplevel(root)
-        # self.flight_summary_window.title("Flight Summary")
+class Car(Vehicle):
+    def __init__(self, num_doors):
+        super().__init__()  # Calling the constructor of the base class
+        self.num_doors = num_doors
 
-        # Styling
-        style = ttk.Style()
-        style.configure("Flight.TLabel", font=(None, 12), padding=(5, 2))
-        style.configure("Flight.TFrame", background="#EFEFEF")
+    def display_info(self):  # Overriding the display_info method in the derived class
+        super().display_info()  # Calling the display_info method of the base class
+        print(super().brand)
+        print(f"Number of doors: {self.num_doors}")
 
-        # Main frame
-        main_frame = ttk.Frame(self.root, style="Flight.TFrame")
-        main_frame.grid(row=0, column=0, padx=10, pady=10, sticky=tk.W+tk.E+tk.N+tk.S)
+v1 = Vehicle()
+v1.create_atr("ford", "attitude")
+# Creating an instance of the Car class
+my_car = Car(num_doors=4)
 
-        # Display flight information in labels
-        self.create_label(main_frame, "Origin:", self.origin)
-        self.create_label(main_frame, "Destination:", self.destination)
-        self.create_label(main_frame, "Departure Time:", self.departure_time)
-        self.create_label(main_frame, "Duration:", self.duration)
-        self.create_label(main_frame, "Status:", self.status)
-        self.create_label(main_frame, "Date:", self.date)
-        self.create_label(main_frame, "Flight Code:", self.code)
-        self.create_label(main_frame, "Price:", self.price)
-        self.create_label(main_frame, "Available Seats:", self.available_seats)
-
-    def create_label(self, parent, label_text, value):
-        ttk.Label(parent, text=f"{label_text} {value}", style="Flight.TLabel").grid(row=self.counter, column=0, padx=10, pady=5, sticky=tk.W)
-        self.counter += 1
-
-def main():
-    root = tk.Tk()
-    root.geometry("400x300")
-
-    app = FlightSummaryApp(root)
-    root.mainloop()
-
-main()
+# Calling the display_info method of the Car class
+my_car.display_info()
