@@ -9,7 +9,6 @@ from datetime import timedelta
 is_testing = True
 app = None
 
-
 class Time:
     def __init__(self, hour, minute):
         self.hour = hour
@@ -245,7 +244,7 @@ flightManager.create_flight_schedule(route4, Time(20, 30), Time(1, 0), 1, "232",
 
 me = Client("e", "e")
 clientContainer.add_new_client(me)
-passenger1 = Passenger(first_name="John", surname="Doe", date_of_birth="1990-01-01", country="USA", service_type="Service")
+passenger1 = Passenger(first_name="John", surname="Doe", date_of_birth="1990-01-01", country="USA", service_type="Economy Class")
 me.buy_ticket(flightManager.flights[0], [passenger1], "BK98332")
 
 class FlightBookingApp:
@@ -384,7 +383,8 @@ class FlightBookingApp:
             try:
                 element.hide() if hasattr(element, 'hide') else element.place_forget()
             except Exception as e:
-                print(f"Unable to hide or place_forget: {e}")
+                None
+                # print(f"Unable to hide or place_forget: {e}")
 
             
 class FlightSelection:
