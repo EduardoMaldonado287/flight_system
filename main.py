@@ -179,6 +179,7 @@ class Client:
         flight.available_seats -= len(passengers)
         new_ticket = Ticket(flight, passengers, booking_number)
         self.tickets.append(new_ticket)
+        print("LEN TICKETS: ", len(self.tickets))
         print("TICKET SUCCESUFLYY BOUGT CLIENT.BUY_TICKET()")
         return True
 
@@ -189,6 +190,10 @@ class Ticket:
         self.passengers = passengers
         self.booking_number = booking_number
         # clientContainer.current_client.add_ticket(self)
+        
+        print("CLASS TICKE TPRINT PASSENGER ")
+        for passenger in self.passengers:
+            print(passenger.first_name)
 
 
 class ServiceContainer:
@@ -264,7 +269,16 @@ passenger1 = Passenger(first_name="John", surname="Doe", date_of_birth="1990-01-
 passenger2 = Passenger(first_name="Alice", surname="Smith", date_of_birth="1985-05-15", country="Canada", service_type="Premium Service")
 me.buy_ticket(flightManager.flights[0], [passenger1, passenger2], "BK98332")
 me.buy_ticket(flightManager.flights[4], [passenger1, passenger2], "BK98332")
-clientContainer.login(me.email, me.password)
+
+passenger3 = Passenger(first_name="Edu", surname="Mal", date_of_birth="1990-01-01", country="USA", service_type="Service")
+clientContainer.logout()
+me2 = Client("a", "a")
+clientContainer.add_new_client(me2)
+# clientContainer.(me.email, me.password)
+# me2.buy_ticket(flightManager.flights[0], [passenger1, passenger2], "BK98332")
+me2.buy_ticket(flightManager.flights[4], [passenger3], "BK98332")
+
+
 
 class FlightBookingApp:
     def __init__(self, root):
@@ -305,12 +319,18 @@ class FlightBookingApp:
         self.select_flight_in_bookings_btn = tk.Button(self.root, text="View Flight", 
             command=lambda: (self.flight_summary_widget.display_flight_summary(
                 self.flight_display.get_selected_flight(),
-                clientContainer.current_client.tickets[1].passengers
-                # clientContainer.current_client.tickets[self.flight_display.get_flight_index()].passengers
+                # clientContainer.current_client.tickets[len(clientContainer.current_client.tickets)-1].passengers
+                clientContainer.current_client.tickets[self.flight_display.get_flight_index()].passengers
 
             ),
             self.close_btn.place(x=650, y=95),
-            print("!"*10, "CLIENT CONTAINER IN SELECT FLIGHT IN BOOKING BTN: ", clientContainer.current_client.email)
+            print("!"*10, "CLIENT CONTAINER IN SELECT FLIGHT IN BOOKING BTN: ", clientContainer.current_client.email),
+            # print("Flight to display in lambda funcion index 1", 
+            #       clientContainer.current_client.tickets[self.flight_display.get_flight_index()].passengers[0].first_name)
+            
+            # for passenger in clientContainer.current_client.tickets[self.flight_display.get_flight_index()].passengers:
+            #     print("The passenger of the lambda funcion is: ", passenger.first_name)
+            [print("The passenger of the lambda funcion is: ", passenger.first_name) for passenger in clientContainer.current_client.tickets[self.flight_display.get_flight_index()].passengers]
             )
         )
         
@@ -379,7 +399,7 @@ class FlightBookingApp:
             print("Changing show login state to false")
             self.client_login_widget.show_login()
         
-        print(clientContainer.current_client)
+        print(clientContainer.current_client.email)
         self.complete_order_btn.place(x=220, y = 520)
 
         # if not clientContainer.current_client:
@@ -667,7 +687,7 @@ class PassengerForm:
         # Etiquetas y campos de entrada
         self.save_passenger_button["text"] = "Add Passenger 1"
 
-        self.passenger_list.clear()
+        self.passenger_list = []
         self.main_frame.place(x=100, y=200, height=300, width=650)
 
         ttk.Label(self.main_frame, text="First Name:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
@@ -696,7 +716,7 @@ class PassengerForm:
         
     def save_passenger(self):
         # Crear un objeto Passenger con la información ingresada
-        
+        print("CURRENTTTTTTTTTTTTTTTTT CLIENT:", clientContainer.current_client.email)
         if not is_testing:
             if (not self.first_name_var.get() or not self.surname_var.get() or not self.date_of_birth_var.get()
                 or not self.country_var.get() or not self.service_type_var.get()):
@@ -710,8 +730,9 @@ class PassengerForm:
             country=self.country_var.get(),
             # buscar objeto de service type
             service_type=self.service_type_var.get()
-        
         )
+        
+
 
         self.passenger_list.append(passenger)
         
@@ -728,7 +749,7 @@ class PassengerForm:
     def hide(self):
         print("hiding button")
 
-        self.main_frame.place_forget()
+        self.main_frame.destroy()
         self.save_passenger_button.place_forget()
         
     def get_passenger_list(self):
